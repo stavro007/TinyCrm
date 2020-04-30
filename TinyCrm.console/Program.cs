@@ -19,7 +19,7 @@ namespace TinyCrm.console
             var lineCount = File.ReadAllLines(path).Length;
             
             List<Product> products = new List<Product>();  // lista me ta antikeimena typou Product
-            List<String> product_ids = new List<String>(); // lista me ta ids ton proionton gia check
+            List<string> product_ids = new List<string>(); // lista me ta ids ton proionton gia check
 
             foreach (string line in readText)
             {
@@ -31,6 +31,7 @@ namespace TinyCrm.console
                 {
                     var prod = new Product(columns[0], columns[1], columns[2]); // dhmioyrgia antikeimenou
                     products.Add(prod);
+                    product_ids.Add(columns[0]);
                 }
                 
             }
