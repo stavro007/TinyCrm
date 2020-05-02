@@ -17,15 +17,18 @@ namespace TinyCrm.console
         public decimal TotalGross { get; private set; }
         public bool IsActive { get; set; }
 
-        private List<Order> order;
-        
-        public Customer(string vatNumber)
+        public List<Order> orders = new List<Order>();
+
+
+        public Customer(string firstName, string lastName,string vatNumber)
         {
-            //if (!IsValidVatNumber(vatNumber))
-            //{
-               // throw new Exception("Invalid VatNumber");
-            //}
+            if (!IsValidVatNumber(vatNumber))
+            {
+                throw new Exception("Invalid VatNumber");
+            }
             VatNumber = vatNumber;
+            FirstName = firstName;
+            LastName = lastName;
             Created = DateTime.Now;
 
         }
@@ -44,7 +47,7 @@ namespace TinyCrm.console
             }
             else return false;
         }
-        
+
         public bool IsVaLidEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email))
@@ -60,10 +63,17 @@ namespace TinyCrm.console
             {
                 return false;
             }
+
         }
 
-       
-        
+        public void AddOrder(Order aOrder)
+        {
+            orders.Add(aOrder);
+
+        }
+
+
+
 
     }
 }
