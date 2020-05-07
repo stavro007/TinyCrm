@@ -3,83 +3,206 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-
+using TinyCrm.console.TinyCrmDbContext;
+using TinyCrm.console.Options;
+using System.Security.Cryptography.X509Certificates;
 
 namespace TinyCrm.console
 {
     class Program
 
     {
-        public static List<Product> OrderProducts(List<Product> products) // epilogh 10 products apo ta diathesima sto katastima
+        public static void SearchCustomers(TinyCrmDBcontext db, CustomerOptions opt)
         {
-            var selectProducts = new List<Product>();
-            Random rnd = new Random();
-            for (var i = 0; i < 10; i++)
+            var customerList = new List<Customer>();
+            
+            string optCustomerId = Convert.ToString(opt.CustomerId);
+            string optCustomerDateFrom = Convert.ToString(opt.CreatedFrom);
+            string optCustomerDateTo = Convert.ToString(opt.CreatedTo);
+
+            if (!(optCustomerId == "0"))  // ean exei dosei id o xrhsths sto UI tha epistrepsei to monadiko record
             {
-                int n = rnd.Next(products.Count);
-                Product pro = products.ElementAt(n);
-                selectProducts.Add(pro);
+                var customer = db
+                   .Set<Customer>()
+                   .Where(c => c.CustomerId == opt.CustomerId)
+                   .SingleOrDefault();
+
+                Console.WriteLine($"Monadiko apotelesma:O/H {customer.FirstName} {customer.LastName}");
+
             }
-            return selectProducts;
+            else
+            {
+                if (!String.IsNullOrWhiteSpace(opt.LastName))
+                {
+                    //int numberOfrecords = 2;
+                    customerList = db
+                       .Set<Customer>()
+                       .Where(c => c.LastName == opt.LastName)
+                       //.Take(numberOfrecords)                 // gia na paroume ta prota dyo stoixeia
+                       .ToList();
+
+                }
+                if (!String.IsNullOrWhiteSpace(opt.FirstName))
+                {
+                    int numberOfrecords = 2;
+                    customerList = db
+                       .Set<Customer>()
+                       .Where(c => c.FirstName == opt.FirstName)
+                       //.Take(numberOfrecords)              // gia na paroume ta prota dyo stoixeia
+                       .ToList();
+
+                }
+                if (!String.IsNullOrWhiteSpace(opt.VatNumber))
+                {
+                    int numberOfrecords = 2;
+                    customerList = db
+                       .Set<Customer>()
+                       .Where(c => c.VatNumber == opt.VatNumber)
+                      // .Take(numberOfrecords)                     // gia na paroume ta prota dyo stoixeia
+                       .ToList();
+
+                }
+                if (String.IsNullOrWhiteSpace(optCustomerDateFrom) && String.IsNullOrWhiteSpace(optCustomerDateTo))
+                {
+                    
+                    //int numberOfrecords = 2;    // bazo dokimastika na epistrefei mexri 2 records afoy den exo 500 eggrafes sth bash
+                    customerList = db
+                       .Set<Customer>()
+                       .Where(c => c.Created >= opt.CreatedFrom && c.Created <= opt.CreatedTo)
+                       //.Take(numberOfrecords)
+                       .ToList();
+                       
+                }
+                
+            }
+            Console.WriteLine("Apotelesmata anazhthsh");
+            
+            foreach(Customer c in customerList)
+            {
+                Console.WriteLine($" o kyrios {c.FirstName} {c.LastName} me CustomerId: {c.CustomerId}");
+            }
+            
         }
+
+        public static void SearchProducts(TinyCrmDBcontext db,ProductOptions opt)
+        {
+            var productList = new List<Product>();
+
+            string optCustomerMinPrice = Convert.ToString(opt.MinPrice);
+            string optCustomerMaxPrice = Convert.ToString(opt.MaxPrice);
+
+            string optProductId = Convert.ToString(opt.ProductId);
+
+            if (!(optProductId == "0"))  // ean exei dosei id o xrhsths sto UI tha epistrepsei to monadiko record
+            {
+                var product = db
+                   .Set<Product>()
+                   .Where(p => p.ProductId == opt.ProductId)
+                   .SingleOrDefault();
+
+                Console.WriteLine($"Monadiko apotelesma:To product {product.Name} {product.ProductCategory}");
+
+            }
+            else
+            {
+                if (!String.IsNullOrWhiteSpace(optCustomerMinPrice) && !String.IsNullOrWhiteSpace(optCustomerMaxPrice))
+                {
+                    productList = db
+                  .Set<Product>()
+                  .Where(p => p.Price >= opt.MinPrice && p.Price <= opt.MaxPrice)
+                  .Take(2)
+                  .ToList();
+                }
+
+
+            }
+            Console.WriteLine("Ta prointa poy brethikan einai");
+            foreach(Product p in productList)
+            {
+                Console.WriteLine($"NAME: {p.Name} " +
+                                    $"Category: {p.ProductCategory} ");
+            }
+
+        }
+
+
         static void Main(string[] args)
         {
-            string path = "C:/Users/Spyros/Desktop/products.txt";
 
-            // anoigma arxeiou gia na diabasoume grammi grammi
-            string[] readText = File.ReadAllLines(path, Encoding.UTF8);
-            var lineCount = File.ReadAllLines(path).Length;
+            var tinyCrmDbContext = new TinyCrmDBcontext();
 
-            List<Product> products = new List<Product>();  // lista me ta antikeimena typou Product
-            List<string> product_ids = new List<string>(); // lista me ta ids ton proionton gia check
+            Console.WriteLine("Eisagete filtra anazhthshs gia Products");
 
-            foreach (string line in readText)
+            Console.WriteLine("ProductID");
+            string productid = Console.ReadLine();
+            if (String.IsNullOrWhiteSpace(productid))
             {
-                string[] columns = line.Split(';');
-                var check = product_ids.Any(product_ids => product_ids.Contains(columns[0]));
-
-                if (check)            // ean yparxei hdh to id sth lista enhmeronei
-                {
-                    Console.WriteLine("Yparxei hdh product me to id");
-                }
-                else
-                {
-                    var prod = new Product(columns[0], columns[1], columns[2]); // allios dhmioyrgia antikeimenou
-                    products.Add(prod);
-                    product_ids.Add(columns[0]);
-                }
-
+                productid = "0";         // ean de balei kati o xrhths dino mia timh 0 poy ksero oti den yparxei sth bash
             }
+            Console.WriteLine("Eisagete elaxisth timh prointos");
+            decimal min_price = Convert.ToDecimal(Console.ReadLine());
 
-            var C1 = new Customer("Georgios", "Georgiou", "000111222");    // dhmioyrgia customers
-            var C2 = new Customer("Basilis", "Basiliou", "000111222");
-
-            var Order1 = new Order();
-            var selected_prod1 = OrderProducts(products);    // pernoyme mia lista me 10 random products
-            Order1.products = selected_prod1;               // anathetoume th lista me ta products sthn order1( 1os pelatis)
-
-            var Order2 = new Order();
-            var selected_prod2 = OrderProducts(products);      // pernoyme mia lista me 10 random products
-            Order2.products = selected_prod2;                 // anathetoume th lista me ta products sthn order2( 2os pelatis)
+            Console.WriteLine("Eisagete megisth timh prointos");
+            decimal max_price = Convert.ToDecimal(Console.ReadLine());
 
 
-            C1.AddOrder(Order1);                 // syndeoyme to 1o pelati me thn order1
-            C2.AddOrder(Order2);                  // syndeoyme to 2o pelati me thn order2
-
-
-            decimal total = Order1.products.Sum(item => item.Price);  // pernoyme to kostos ths agoras toy 1ou pelati
-            decimal total2 = Order2.products.Sum(item => item.Price);  // pernoyme to kostos ths agoras toy 2ou pelati
-
-            // the most valuable customer is...
-            if (total > total2)
+            var searchOptions = new ProductOptions
             {
-                Console.WriteLine($"The most valuable customer is Georgios Georgiou, kostos {total} eyro");
-            }
-            else if (total < total2)
-            {
-                Console.WriteLine($"The most valuable customer is Basilis Basiliou, kostos {total2} eyro");
-            }
-            else Console.WriteLine("To kostos agoras einai to idio");
+
+                ProductId = Convert.ToInt32(productid),
+                MinPrice = min_price,
+                MaxPrice = max_price,
+            };
+
+            SearchProducts(tinyCrmDbContext, searchOptions);
+            
+            
+             Console.WriteLine("Eisagete filtra anazhthshs Customers");
+
+             Console.WriteLine("CustomerID");
+             string customerid = Console.ReadLine();
+             if (String.IsNullOrWhiteSpace(customerid)){
+                 customerid = "0";         // ean de balei kati o xrhths dino mia timh 0 poy ksero oti den yparxei sth bash
+             }
+
+             Console.WriteLine("VatNumber");
+             string vatnumber = Console.ReadLine();
+
+             Console.WriteLine("FirstName");
+             string firstname = Console.ReadLine();
+
+             Console.WriteLine("LastName");
+             string lastname = Console.ReadLine();
+
+             Console.WriteLine("Enter CreatedFrom date");
+             DateTime userDateTimeFrom;
+             if (!DateTime.TryParse(Console.ReadLine(), out userDateTimeFrom)) {
+
+                 Console.WriteLine("Lathos eisagogi");
+             }
+            DateTime userDateTimeTo;
+            Console.WriteLine("Enter CreatedTo date");
+             if (!DateTime.TryParse(Console.ReadLine(), out userDateTimeTo))
+             {
+
+                 Console.WriteLine("Lathos eisagogi");
+             }
+            // dhmiourgoume ena customeroptions antikeimeno symfona me ta kritiria toy xristi
+            var searchOptionsC = new CustomerOptions
+             {
+
+                 CustomerId = Convert.ToInt32(customerid),
+                 FirstName = firstname,
+                 LastName = lastname,
+                 VatNumber = vatnumber,
+                 CreatedFrom = userDateTimeFrom,
+                 CreatedTo = userDateTimeTo,
+
+             };
+
+             SearchCustomers(tinyCrmDbContext, searchOptionsC);
+             
+
 
 
         }

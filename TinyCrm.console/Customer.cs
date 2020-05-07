@@ -7,12 +7,12 @@ namespace TinyCrm.console
 {
     public class Customer
     {
-        public string CustomerId { get; set; }
+        public int CustomerId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime Created { get; private set; }
+        public DateTime Created { get;  set; }
         public string Email { get; set; }
-        public string VatNumber { get; private set; }
+        public string VatNumber { get;  set; }
         public string Phone { get; set; }
         public decimal TotalGross { get; private set; }
         public bool IsActive { get; set; }
@@ -20,7 +20,7 @@ namespace TinyCrm.console
         public List<Order> orders = new List<Order>();
 
 
-        public Customer(string firstName, string lastName,string vatNumber)
+        /*public Customer(string firstName, string lastName,string vatNumber)
         {
             if (!IsValidVatNumber(vatNumber))
             {
@@ -32,7 +32,7 @@ namespace TinyCrm.console
             Created = DateTime.Now;
 
         }
-
+        */
         public bool IsValidVatNumber(string vat)
         {
             if (string.IsNullOrWhiteSpace(vat))
