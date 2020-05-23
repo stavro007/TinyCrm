@@ -173,19 +173,19 @@ namespace TinyCrm.console
                 tinyCrmDbContext.SaveChanges();
                 tinyCrmDbContext.Dispose();
                 */
-            var context = new TinyCrmDBcontext();
+            //var context = new TinyCrmDBcontext();
 
-            ICustomerService customerService = new CustomerService(
-                    context);
+           // ICustomerService customerService = new CustomerService(
+                   // context);
 
-            var customer = customerService.CreateCustomer(
-                    new CreateCustomerOptions()
-                    {
-                        FirstName = "Dimitris",
-                        LastName = "Pnevmatikos",
-                        VatNumber = "123456789",
+            //var customer = customerService.CreateCustomer(
+                    //new CreateCustomerOptions()
+                   // {
+                      //  FirstName = "Dimitris",
+                 //  LastName = "Pnevmatikos",
+                      //  VatNumber = "123456789",
 
-                    });
+                   // });
                         
                    
 

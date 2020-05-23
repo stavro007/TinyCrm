@@ -90,6 +90,7 @@ namespace TinyCrm.Core.Services
             return customer;
         }
 
+       
         public bool CreateCustomer(CreateCustomerOptions opt)
         {
             if (opt == null) return false;
@@ -100,9 +101,10 @@ namespace TinyCrm.Core.Services
                 LastName = opt.LastName,
                 Email = opt.Email,
                 VatNumber = opt.VatNumber,
+                Created = DateTime.Now
             };
             db_.Add(customer);
-            db_.SaveChanges();
+            //db_.SaveChanges();
 
             if(db_.SaveChanges() > 0)
             {
